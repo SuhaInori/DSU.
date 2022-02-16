@@ -1,0 +1,772 @@
+
+    1：FindWindow函数
+
+    该函数可以通过窗口类名或者窗口标题名来查找特定窗口句柄，返回值是窗口的句柄（在Windows中，句柄是一个系统内部数据结构的引用。例如当你操作一个窗口，或说是一个Delphi窗体时，系统会给你一个该窗口的句柄，系统会通知你：你正在操作142号窗口，就此你的应用程序就能要求系统对142号窗口进行操作——移动窗口、改变窗口大小、把窗口最小化等等。实际上许多Windows API函数把句柄作为它的第一个参数，如GDI（图形设备接口）句柄、菜单句柄、实例句柄、位图句柄等，不仅仅局限于窗口函数。换句话说，句柄是一种内部代码，通过它能引用受系统控制的特殊元素，如窗口、位图、图标、内存块、光标、字体、菜单等。）
+
+    函数用法
+
+    #include "stdafx.h"
+    #include<windows.h>
+
+    int main() {
+        HWND window;    //定义一个窗口句柄变量，用来储存窗口句柄
+        FindWindow("这里填窗口类名","这里填窗口标题名")
+        窗口类名和窗口标题名可以只填一个，不填的用NULL填充
+    window = FindWindow(NULL, "文本.txt - 记事本");  //查找标题为"文本.txt - 记事本"的窗口
+    SendMessage(window, WM_CLOSE, 0, 0);              //向窗口发送关闭指令
+    return 0;
+    }
+
+    2：SendMessage函数
+
+    刚刚在第一个例子里面已经用到了SendMessage函数，这个函数的功能是向句柄对应窗口发送指令
+
+    函数用法
+
+    #include "stdafx.h"
+    #include<windows.h>
+
+    int main() {
+        POINT mouse;
+        HWND window;
+        while (1) {
+            GetCursorPos(&mouse);
+            window = WindowFromPoint(mouse);
+            SendMessage(窗口句柄,消息类型,消息附带内容,消息附带内容)
+            比如我这里选定的消息类型是WM_CHAR
+            消息附带内容为WPARAM('a')
+            所以消息附带内容就是模拟键盘向窗口输入a
+    SendMessage(window, WM_CHAR, WPARAM('a'), 0);
+    Sleep(100);
+        }
+        return 0;
+    }
+
+
+    3：WindowFromPoint函数
+
+    在第二个例子中我们使用了一个叫做WindowFromPoint的函数，这个函数的功能是通过鼠标点击获得被点击窗口的句柄
+
+    函数用法
+
+    #include "stdafx.h"
+    #include<windows.h>
+
+    int main() {
+        POINT mouse;        //定义一个结构体变量储存鼠标位置
+        HWND window;
+        while (1) {
+            GetCursorPos(&mouse);   //获取到当前鼠标位置
+            WindowFromPoint(鼠标位置变量名)
+    window = WindowFromPoint(mouse);
+    SendMessage(window, WM_CLOSE, 0, 0);
+    Sleep(100);
+        }
+        return 0;
+    }
+
+   4： ShowWindow函数
+    这个函数用来实现对windows窗口包括最大化最小化隐藏在内的操作，具体用法为ShowWindow(句柄变量名,功能)。
+    功能例如 SW_HIDE 隐藏窗口、SW_MAXIMIZE 最大化窗口、SW_MINIMIZE 最小化窗口、SW_RESTORE 还原窗口。
+
+    #include<windows.h>
+    #include<stdio.h>
+    #include<time.h>
+
+    int main(){
+        HWND window;
+        window = FindWindow(NULL,"新建文本文档.txt - 记事本");
+        ShowWindow(window,SW_HIDE);                //隐藏窗口
+        Sleep(5000);
+        ShowWindow(window,SW_MAXIMIZE);            //最大化窗口
+        Sleep(5000);
+        ShowWindow(window,SW_MINIMIZE);            //最小化窗口
+        Sleep(5000);
+        ShowWindow(window,SW_RESTORE);             //还原窗口
+        Sleep(5000);
+        return 0;
+}
+
+    5：GetClientRect函数
+    用途
+    GetClientRect函数可以用来获取窗口的尺寸，尺寸信息储存在RECT的right和bottom两个元素中，自我认为其实本质上这个函数是记录了窗口右下角顶点相对于窗口左上角顶点的水平/垂直距离。
+
+    参数
+    GetClientRect函数含有两个参数值，分别是目标窗口的句柄值 （见 C语言windows.h库的常用函数（一）） 和用来储存坐标信息的RECT型数据的内存地址
+
+    示例
+    #include<windows.h>
+    #include<stdio.h>
+    int main(){
+        HWND windows;    //句柄变量，第一节中有介绍
+        while(true){
+            windows=FindWindow(NULL,"新建文本文档.txt - 记事本");
+            RECT rectangle;      //矩形变量，用于记录矩形四个角的数据
+            GetClientRect(windows,&rectangle);
+                    printf("%d,%d,%d,%d\n",rectangle.left,rectangle.top,rectangle.right,rectangle.bottom);
+            Sleep(1000);
+        }
+    }
+
+    6：GetCWindowRect函数
+    用途
+    此函数功能类似于GetClientRect函数，同样是可以用来获取窗口的尺寸，但是与GetClientRect函数不同的是它的返回值为窗口左上角和窗口右下角顶点相对于屏幕左上角的水平/垂直距离。
+
+    参数
+    与GetClientRect函数相同，GetCWindowRect函数含有的两个参数值，同样是目标窗口的句柄值和用来储存坐标信息的RECT型数据的内存地址
+
+    示例
+    #include<windows.h>
+    #include<stdio.h>
+    int main(){
+  	    HWND windows;
+  	    while(true){
+  		    windows=FindWindow(NULL,"新建文本文档.txt - 记事本");
+  		    RECT rectangle;
+  		    GetWindowRect(windows,&rect);
+  		    printf("%d,%d,%d,%d\n",rectangle.left,rectangle.top,rectangle.right,rectangle.bottom);
+  		    Sleep(300);
+  	    }
+    }
+
+
+
+
+
+
+
+
+虚拟键	十六进制值	十进制值	相应键盘或鼠标键
+VK_LBUTTON	01	    1	鼠标左键
+VK_RBUTTON	02	    2	鼠标右键c
+VK_CANCEL	03  	3	Ctrl-Break键
+VK_MBUTTON	04	    4	鼠标中键
+VK_BACK		08	    8	Backspace键
+VK_TAB		09	    9	Tab键
+VK_CLEAR	0C	    12	Clear键
+VK_RETURN	0D	    13	Enter键
+VK_SHIFT	10	    16	Shift键
+VK_CONTROL	11	    17	Ctrl键
+VK_MENU		12	    18	Alt键
+VK_PAUSE	13	    19	Pause键
+VK_CAPITAL	14	    20	Caps Lock键
+VK_ESCAPE	1B	    27	Esc键
+VK_SPACE	20	    32	Space键
+VK_PRIOR	21  	33	Page Up键
+VK_NEXT		22	    34	Page Down键
+VK_END		23	    35	End键
+VK_HOME		24	    36	Home键
+VK_LEFT		25	    37	←键
+VK_UP		26	    38	↑键
+VK_RIGHT	27	    39	→键
+VK_DOWN		28	    40	↓键
+VK_SELECT	29	    41	Select键
+VK_PRINT	2A	    42	Print键
+VK_EXECUTE	2B	    43	Execute键
+VK_SNAPSHOT	2C	    44	Print Screen键
+VK_INSERT	2D	    45	Ins键
+VK_DELETE	2E	    46	Del键
+VK_HELP		2F	    47	Help键
+VK_0		30	    48	0键
+VK_1		31	    49	1键
+VK_2		32	    50	2键
+VK_3		33	    51	3键
+VK_4		34  	52	4键
+VK_5		35	    53	5键
+VK_6		36	    54	6键
+VK_7		37	    55	7键
+VK_8		38	    56	8键
+VK_9		39	    57	9键
+VK_A		41	    65	A键
+VK_B		42	    66	B键
+VK_C		43	    67	C键
+VK_D		44	    68	D键
+VK_E		45	    69	E键
+VK_F		46	    70	F键
+VK_G		47	    71	G键
+VK_H		48	    72	H键
+VK_I		49  	73	I键
+VK_J		4A	    74	J键
+VK_K		4B	    75	K键
+VK_L		4C	    76	L键
+VK_M		4D	    77	M键
+VK_N		4E	    78	N键
+VK_O		4F	    79	O键
+VK_P		50	    80	P键
+VK_Q		51	    81	Q键
+VK_R		52	    82	R键
+VK_S		53  	83	S键
+VK_T		54  	84	T键
+VK_U		55	    85	U键
+VK_V		56	    86	V键
+VK_W		57	    87	W键
+VK_X		58	    88	X键
+VK_Y		59	    89	Y键
+VK_Z		5A	    90	Z键
+VK_LWIN		5B  	91	左Windows键
+VK_RWIN		5C	    92	右Windows键
+VK_APPS		5D  	93	应用程序键
+VK_SLEEP	5F	    95	休眠键
+VK_NUMPAD0	60  	96	小数字键盘0键
+VK_NUMPAD1	61  	97	小数字键盘1键
+VK_NUMPAD2	62  	98	小数字键盘2键
+VK_NUMPAD3	63	    99	小数字键盘3键
+VK_NUMPAD4	64	    100	小数字键盘4键
+VK_NUMPAD5	65	    101	小数字键盘5键
+VK_NUMPAD6	66	    102	小数字键盘6键
+VK_NUMPAD7	67	    103	小数字键盘7键
+VK_NUMPAD8	68	    104	小数字键盘8键
+VK_NUMPAD9	69	    105	小数字键盘9键
+VK_MULTIPLY	6A	    106	乘号键
+VK_ADD      6B	    107	加号键
+VK_SEPARATOR 6C	    108	分割键
+VK_SUBSTRACT 6D	    109	减号键
+VK_DECIMAL	6E	    110	小数点键
+VK_DIVIDE	6F	    111	除号键
+VK_F1		70	    12	F1键
+VK_F2		71	    113	F2键
+VK_F3		72	    114	F3键
+VK_F4		73	    115	F4键
+VK_F5		74	    116	F5键
+VK_F6		75	    117	F6键
+VK_F7		76	    118	F7键
+VK_F8		77	    119	F8键
+VK_F9		78	    120	F9键
+VK_F10		79	    121	F10键
+VK_F11		7A	    122	F11键
+VK_F12		7B	    123	F12键
+VK_F13		7C	    124	F13键
+VK_F14		7D     	125	F14键
+VK_F15		7E  	126	F15键
+VK_F16		7F  	127	F16键
+VK_F17		80  	128	F17键
+VK_F18		81  	129	F18键
+VK_F19		82  	130	F19键
+VK_F20		83  	131	F20键
+VK_F21		84  	132	F21键
+VK_F22		85	    133	F22键
+VK_F23		86	    134	F23键
+VK_F24		87	    135	F24键
+VK_NUMLOCK	90	    144	Num Lock键
+VK_SCROLL	91	    45	Scroll Lock键
+VK_LSHIFT	A0	    160	左Shift键
+VK_RSHIFT	A1	    161	右Shift键
+VK_LCONTROL	A2	    162	左Ctrl键
+VK_RCONTROL	A3	    163	右Ctrl键
+VK_LMENU	A4	    164	左Alt键
+VK_RMENU	A5	    165	右Alt键
+
+
+
+0	NUT	32	空格(space)	64	@	96	`
+1	SOH	33	!		65	A	97	a
+2	STX	34	"		66	B	98	b
+3	ETX	35	#		67	C	99	c
+4	EOT	36	$		68	D	100	d
+5	ENQ	37	%		69	E	101	e
+6	ACK	38	&		70	F	102	f
+7	BEL	39	,		71	G	103	g
+8	BS	40	(		72	H	104	h
+9	HT	41	)		73	I	105	i
+10	LF	42	*		74	J	106	j
+11	VT	43	+		75	K	107	k
+12	FF	44	,		76	L	108	l
+13	CR	45	-		77	M	109	m
+14	SO	46	.		78	N	110	n
+15	SI	47	/		79	O	111	o
+16	DLE	48	0		80	P	112	p
+17	DCI	49	1		81	Q	113	q
+18	DC2	50	2		82	R	114	r
+19	DC3	51	3		83	S	115	s
+20	DC4	52	4		84	T	116	t
+21	NAK	53	5		85	U	117	u
+22	SYN	54	6		86	V	118	v 
+23	TB	55	7		87	W	119	w
+24	CAN	56	8		88	X	120	x
+25	EM	57	9		89	Y	121	y
+26	SUB	58	:		90	Z	122	z
+27	ESC	59	;		91	[	123	{
+28	FS	60	<		92	/	124	|
+29	GS	61	=		93	]	125	}
+30	RS	62	>		94	^	126	`
+31	US	63	?		95	_	127	DEL
+
+
+
+
+
+VK_LBUTTON 1 滑鼠左键
+　　VK_RBUTTON 2 滑鼠右键
+　　VK_CANCEL 3 Ctrl+Break
+　　VK_MBUTTON 4 滑鼠中键
+　　VK_BACK 8 退格
+　　VK_TAB 9 TAB
+　　VK_CLEAR 12 NUM LOCK关闭时的数字键盘5?
+　　VK_RETURN 13 回车
+　　VK_SHIFT 16 Shift
+　　VK_CONTROL 17 Ctrl
+　　VK_MENU 18 Alt
+　　VK_PAUSE 19 Pause Break
+　　VK_CAPITAL 20 Caps Lock
+　　VK_ESCAPE 27 ESC
+　　VK_SPACE 32 空格键
+　　VK_PRIOR 33 Page up
+　　VK_NEXT 34 Page down
+　　VK_END 35 End
+　　VK_HOME 36 Home
+　　VK_LEFT 37 左箭头
+　　VK_RIGHT 38 上箭头
+　　VK_UP 39 右箭头
+　　VK_DOWN 40 下箭头
+　　VK_SELECT 41 
+　　VK_PRINT 42 
+　　VK_EXECUTE 43 
+　　VK_SNAPSHOT 44 Print Screen
+　　VK_INSERT 45 Insert
+　　VK_DELETE 46 Delete
+　　VK_HELP 47
+　　VK_0..9 48..57 主键盘0..9
+　　VK_A..Z 65..90 主键盘A..Z
+　　VK_LWIN 91 左Win
+　　VK_RWIN 92 右Win
+　　VK_APPS 93 快捷菜单
+　　Reserved 94 保留
+　　VK_SLEEP 95 Sleep???
+
+　　数字键盘
+　　VK_NUMPAD0..9 96..105 小键盘上的0到9
+　　VK_MULTIPLY 106 小键盘上的*
+　　VK_ADD 107 小键盘上的+
+　　VK_SEPARATOR 108 分隔符
+　　VK_SUBTRACT 109 小键盘上的-
+　　VK_DECIMAL 110 小键盘上的.
+　　VK_DIVIDE 111 小键盘上的/
+　　VK_NUMLOCK 144 Num Lock
+　　VK_F1..VK_F24 112..135 F1..24
+　　Unassigned 136..145 未定义
+　　VK_SCROLL 145 Scroll Lock
+　　Specific 146..150 特殊用途
+　　Unassigned 151..159 未定义
+　　VK_LSHIFT 160 左Shift键
+　　VK_RSHIFT 161 右Shift键
+　　VK_LCONTROL 162 左Ctrl键
+　　VK_RCONTROL 163 右Ctrl键
+　　VK_LMENU 164 左Alt键
+　　VK_RMENU 165 右Alt键
+
+　　浏览器
+　　VK_BROWSER_BACK A6(166) Browser Back key
+　　VK_BROWSER_FORWARD A7(167) Browser Forward key
+　　VK_BROWSER_REFRESH A8(168) Browser Refresh key
+　　VK_BROWSER_STOP A9(169) Browser Stop key
+　　VK_BROWSER_SEARCH AA(170) Browser Search key 
+　　VK_BROWSER_FAVORITES AB(171) Browser Favorites key
+　　VK_BROWSER_HOME AC(172) Browser Start and Home key
+
+　　音量
+　　VK_VOLUME_MUTE AD Volume Mute key
+　　VK_VOLUME_DOWN AE Volume Down key
+　　VK_VOLUME_UP AF Volume Up key
+
+　　媒体
+　　VK_MEDIA_NEXT_TRACK B0 Next Track key
+　　VK_MEDIA_PREV_TRACK B1 Previous Track key
+　　VK_MEDIA_STOP B2 Stop Media key
+　　VK_MEDIA_PLAY_PAUSE B3 Play/Pause Media key
+
+　　语言
+　　VK_LAUNCH_MAIL B4 Start Mail key
+　　VK_LAUNCH_MEDIA_SELECT B5 Select Media key
+　　VK_LAUNCH_APP1 B6 Start Application 1 key
+　　VK_LAUNCH_APP2 B7 Start Application 2 key
+
+　　标点
+　　VK_OEM_1 186 分号
+　　VK_OEM_PLUS 187 等号
+　　VK_OEM_COMMA 188 逗号
+　　VK_OEM_MINUS 189 减号
+　　VK_OEM_PERIOD 190 句号
+　　VK_OEM_2 191 /
+　　VK_OEM_3 192 ~
+　　Reserved 193..215 保留码
+　　Unassined 216..218 未指定 
+　　VK_OEM_4 219 [
+　　VK_OEM_5 220 \
+　　VK_OEM_6 221 ]
+　　VK_OEM_7 222 引号
+　　VK_OEM_8 223 
+　　VK_ATTN HF6(246) 
+　　VK_CRSEL HF7(247)
+　　VK_EXSEL HF8(248)
+　　VK_EREOF HF9(249)
+　　VK_PLAY HFA(250)
+　　VK_ZOOM HFB(251)
+　　VK_NONAME HFC(252)
+　　VK_PA1 HFD(253)
+　　VK_OEM_CLEAR HFE(254)
+
+
+
+　　完整的虚拟键码表
+
+
+
+　　VK_LBUTTON (01)
+　　Left mouse button
+　　VK_RBUTTON (02)
+　　Right mouse button
+　　VK_CANCEL (03)
+　　Control-break processing
+　　VK_MBUTTON (04)
+　　Middle mouse button (three-button mouse)
+　　VK_XBUTTON1 (05)
+　　Windows 2000/XP: X1 mouse button
+　　VK_XBUTTON2 (06)
+　　Windows 2000/XP: X2 mouse button
+　　- (07)
+　　Undefined
+　　VK_BACK (08)
+　　BACKSPACE key
+　　VK_TAB (09)
+　　TAB key
+　　- (0A-0B)
+　　Reserved
+　　VK_CLEAR (0C)
+　　CLEAR key
+　　VK_RETURN (0D)
+　　ENTER key
+　　- (0E-0F)
+　　Undefined
+　　VK_SHIFT (10)
+　　SHIFT key
+　　VK_CONTROL (11)
+　　CTRL key
+　　VK_MENU (12)
+　　ALT key
+　　VK_PAUSE (13)
+　　PAUSE key
+　　VK_CAPITAL (14)
+　　CAPS 
+LOCK key
+　　VK_KANA (15)
+　　Input Method Editor (IME) Kana mode
+　　VK_HANGUEL (15)
+　　IME Hanguel mode (maintained for compatibility; use VK_HANGUL)
+　　VK_HANGUL (15)
+　　IME Hangul mode
+　　- (16)
+　　Undefined
+　　VK_JUNJA (17)
+　　IME Junja mode
+　　VK_FINAL (18)
+　　IME final mode
+　　VK_HANJA (19)
+　　IME Hanja mode
+　　VK_KANJI (19)
+　　IME Kanji mode
+　　- (1A)
+　　Undefined
+　　VK_ESCAPE (1B)
+　　ESC key
+　　VK_CONVERT (1C)
+　　IME convert
+　　VK_NONCONVERT (1D)
+　　IME nonconvert
+　　VK_ACCEPT (1E)
+　　IME accept
+　　VK_MODECHANGE (1F)
+　　IME mode change request
+　　VK_SPACE (20)
+　　SPACEBAR
+　　VK_PRIOR (21)
+　　PAGE UP key
+　　VK_NEXT (22)
+　　PAGE DOWN key
+　　VK_END (23)
+　　END key
+　　VK_HOME (24)
+　　HOME key
+　　VK_LEFT (25)
+　　LEFT ARROW key
+　　VK_UP (26)
+　　UP ARROW key
+　　VK_RIGHT (27)
+　　RIGHT ARROW key
+　　VK_DOWN (28)
+　　DOWN ARROW key
+　　VK_SELECT (29)
+　　SELECT key
+　　VK_PRINT (2A)
+　　PRINT key
+　　VK_EXECUTE (2B)
+　　EXECUTE key
+　　VK_SNAPSHOT (2C)
+　　PRINT SCREEN key
+　　VK_INSERT (2D)
+　　INS key
+　　VK_DELETE (2E)
+　　DEL key
+　　VK_HELP (2F)
+　　HELP key
+　　(30)
+　　0 key
+　　(31)
+　　1 key
+　　(32)
+　　2 key
+　　(33)
+　　3 key
+　　(34)
+　　4 key
+　　(35)
+　　5 key
+　　(36)
+　　6 key
+　　(37)
+　　7 key
+　　(38)
+　　8 key
+　　(39)
+　　9 key
+　　- (3A-40)
+　　Undefined
+　　(41)
+　　A key
+　　(42)
+　　B key
+　　(43)
+　　C key
+　　(44)
+　　D key
+　　(45)
+　　E key
+　　(46)
+　　F key
+　　(47)
+　　G key
+　　(48)
+　　H key
+　　(49)
+　　I key
+　　(4A)
+　　J key
+　　(4B)
+　　K key
+　　(4C)
+　　L key
+　　(4D)
+　　M key
+　　(4E)
+　　N key
+　　(4F)
+　　O key
+　　(50)
+　　P key
+　　(51)
+　　Q key
+　　(52)
+　　R key
+　　(53)
+　　S key
+　　(54)
+　　T key
+　　(55)
+　　U key
+　　(56)
+　　V key
+　　(57)
+　　W key
+　　(58)
+　　X key
+　　(59)
+　　Y key
+　　(5A)
+　　Z key
+　　VK_LWIN (5B)
+　　Left Windows key (Microsoft Natural keyboard)
+　　VK_RWIN (5C)
+　　Right Windows key (Natural keyboard)
+　　VK_APPS (5D)
+　　Applications key (Natural keyboard)
+　　- (5E)
+　　Reserved
+　　VK_SLEEP (5F)
+　　Computer Sleep key
+　　VK_NUMPAD0 (60)
+　　Numeric keypad 0 key
+　　VK_NUMPAD1 (61)
+　　Numeric keypad 1 key
+　　VK_NUMPAD2 (62)
+　　Numeric keypad 2 key
+　　VK_NUMPAD3 (63)
+　　Numeric keypad 3 key
+　　VK_NUMPAD4 (64)
+　　Numeric keypad 4 key
+　　VK_NUMPAD5 (65)
+　　Numeric keypad 5 key
+　　VK_NUMPAD6 (66)
+　　Numeric keypad 6 key
+　　VK_NUMPAD7 (67)
+　　Numeric keypad 7 key
+　　VK_NUMPAD8 (68)
+　　Numeric keypad 8 key
+　　VK_NUMPAD9 (69)
+　　
+Numeric keypad 9 key
+　　VK_MULTIPLY (6A)
+　　Multiply key
+　　VK_ADD (6B)
+　　Add key
+　　VK_SEPARATOR (6C)
+　　Separator key
+　　VK_SUBTRACT (6D)
+　　Subtract key
+　　VK_DECIMAL (6E)
+　　Decimal key
+　　VK_DIVIDE (6F)
+　　Divide key
+　　VK_F1 (70)
+　　F1 key
+　　VK_F2 (71)
+　　F2 key
+　　VK_F3 (72)
+　　F3 key
+　　VK_F4 (73)
+　　F4 key
+　　VK_F5 (74)
+　　F5 key
+　　VK_F6 (75)
+　　F6 key
+　　VK_F7 (76)
+　　F7 key
+　　VK_F8 (77)
+　　F8 key
+　　VK_F9 (78)
+　　F9 key
+　　VK_F10 (79)
+　　F10 key
+　　VK_F11 (7A)
+　　F11 key
+　　VK_F12 (7B)
+　　F12 key
+　　VK_F13 (7C)
+　　F13 key
+　　VK_F14 (7D)
+　　F14 key
+　　VK_F15 (7E)
+　　F15 key
+　　VK_F16 (7F)
+　　F16 key
+　　VK_F17 (80H)
+　　F17 key
+　　VK_F18 (81H)
+　　F18 key
+　　VK_F19 (82H)
+　　F19 key
+　　VK_F20 (83H)
+　　F20 key
+　　VK_F21 (84H)
+　　F21 key
+　　VK_F22 (85H)
+　　F22 key
+　　VK_F23 (86H)
+　　F23 key
+　　VK_F24 (87H)
+　　F24 key
+　　- (88-8F)
+　　Unassigned
+　　VK_NUMLOCK (90)
+　　NUM LOCK key
+　　VK_SCROLL (91)
+　　SCROLL LOCK key
+　　(92-96)
+　　OEM specific
+　　- (97-9F)
+　　Unassigned
+　　VK_LSHIFT (A0)
+　　Left SHIFT key
+　　VK_RSHIFT (A1)
+　　Right SHIFT key
+　　VK_LCONTROL (A2)
+　　Left CONTROL key
+　　VK_RCONTROL (A3)
+　　Right CONTROL key
+　　VK_LMENU (A4)
+　　Left MENU key
+　　VK_RMENU (A5)
+　　Right MENU key
+　　VK_BROWSER_BACK (A6)
+　　Windows 2000/XP: Browser Back key
+　　VK_BROWSER_FORWARD (A7)
+　　Windows 2000/XP: Browser Forward key
+　　VK_BROWSER_REFRESH (A8)
+　　Windows 2000/XP: Browser Refresh key
+　　VK_BROWSER_STOP (A9)
+　　Windows 2000/XP: Browser Stop key
+　　VK_BROWSER_SEARCH (AA)
+　　Windows 2000/XP: Browser Search key
+　　VK_BROWSER_FAVORITES (AB)
+　　Windows 2000/XP: Browser Favorites key
+　　VK_BROWSER_HOME (AC)
+　　Windows 2000/XP: Browser Start and Home key
+　　VK_VOLUME_MUTE (AD)
+　　Windows 2000/XP: Volume Mute key
+　　VK_VOLUME_DOWN (AE)
+　　Windows 2000/XP: Volume Down key
+　　VK_VOLUME_UP (AF)
+　　Windows 2000/XP: Volume Up key
+　　VK_MEDIA_NEXT_TRACK (B0)
+　　Windows 2000/XP: Next Track key
+　　VK_MEDIA_PREV_TRACK (B1)
+　　Windows 2000/XP: Previous Track key
+　　VK_MEDIA_STOP (B2)
+　　Windows 2000/XP: Stop Media key
+　　VK_MEDIA_PLAY_PAUSE (B3)
+　　Windows 2000/XP: Play/Pause Media key
+　　VK_LAUNCH_MAIL (B4)
+　　Windows 2000/XP: Start Mail key
+　　VK_LAUNCH_MEDIA_SELECT (B5)
+　　Windows 2000/XP: Select Media key
+　　VK_LAUNCH_APP1 (B6)
+　　Windows 2000/XP: Start Application 1 key
+　　VK_LAUNCH_APP2 (B7)
+　　Windows 2000/XP: Start Application 2 key
+　　- (B8-B9)
+　　Reserved
+　　VK_OEM_1 (BA)
+　　Used for miscellaneous characters; it can vary by keyboard.
+　　Windows 2000/XP: For the US standar
+d keyboard, the ';:' key
+　　VK_OEM_PLUS (BB)
+　　Windows 2000/XP: For any country/region, the '+' key
+　　VK_OEM_COMMA (BC)
+　　Windows 2000/XP: For any country/region, the ',' key
+　　VK_OEM_MINUS (BD)
+　　Windows 2000/XP: For any country/region, the '-' key
+　　VK_OEM_PERIOD (BE)
+　　Windows 2000/XP: For any country/region, the '.' key
+　　VK_OEM_2 (BF)
+　　Used for miscellaneous characters; it can vary by keyboard.
+　　Windows 2000/XP: For the US standard keyboard, the '/?' key
+　　VK_OEM_3 (C0)
+　　Used for miscellaneous characters; it can vary by keyboard.
+　　Windows 2000/XP: For the US standard keyboard, the '`~' key
+　　- (C1-D7)
+　　Reserved
+　　- (D8-DA)
+　　Unassigned
+　　VK_OEM_4 (DB)
+　　Used for miscellaneous characters; it can vary by keyboard.
+　　Windows 2000/XP: For the US standard keyboard, the '[{' key
+　　VK_OEM_5 (DC)
+　　Used for miscellaneous characters; it can vary by keyboard.
+　　Windows 2000/XP: For the US standard keyboard, the '\|' key
+　　VK_OEM_6 (DD)
+　　Used for miscellaneous characters; it can vary by keyboard.
+　　Windows 2000/XP: For the US standard keyboard, the ']}' key
+　　VK_OEM_7 (DE)
+　　Used for miscellaneous characters; it can vary by keyboard.
+　　Windows 2000/XP: For the US standard keyboard, the 'single-quote/double-quote' key
+　　VK_OEM_8 (DF)
+　　Used for miscellaneous characters; it can vary by keyboard.
+　　- (E0)
